@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 
 const AuthCallback: React.FC = () => {
@@ -17,15 +16,13 @@ const AuthCallback: React.FC = () => {
         }
 
         if (data.session?.user) {
-          // Check if user profile exists
-          const { data: profile, error: profileError } = await supabase
+          const { error: profileError } = await supabase
             .from('profiles')
             .select('*')
             .eq('id', data.session.user.id)
             .single();
 
           if (profileError && profileError.code === 'PGRST116') {
-            // Profile doesn't exist, create it
             const username = data.session.user.user_metadata?.username || 
                            data.session.user.email?.split('@')[0] || 
                            'user';
@@ -47,7 +44,6 @@ const AuthCallback: React.FC = () => {
           }
 
           setSuccess(true);
-          // Redirect to home page after successful verification
           setTimeout(() => {
             window.location.href = '/';
           }, 2000);
