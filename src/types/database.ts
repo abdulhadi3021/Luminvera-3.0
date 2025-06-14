@@ -85,111 +85,50 @@ export interface Database {
           updated_at?: string
         }
       }
+      profiles: {
+        Row: {
+          id: string
+          username: string
+          full_name: string | null
+          role: 'user' | 'seller' | 'publisher' | 'admin'
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          username: string
+          full_name?: string | null
+          role?: 'user' | 'seller' | 'publisher' | 'admin'
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          username?: string
+          full_name?: string | null
+          role?: 'user' | 'seller' | 'publisher' | 'admin'
+          created_at?: string | null
+          updated_at?: string | null
+        }
+      }
       users: {
         Row: {
           id: string
           email: string | null
           full_name: string | null
-          avatar_url: string | null
-          created_at: string
-          updated_at: string
+          role: string | null
         }
         Insert: {
           id: string
           email?: string | null
           full_name?: string | null
-          avatar_url?: string | null
-          created_at?: string
-          updated_at?: string
+          role?: string | null
         }
         Update: {
           id?: string
           email?: string | null
           full_name?: string | null
-          avatar_url?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      cart_items: {
-        Row: {
-          id: string
-          user_id: string | null
-          product_id: string | null
-          quantity: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          product_id?: string | null
-          quantity?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          product_id?: string | null
-          quantity?: number
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      orders: {
-        Row: {
-          id: string
-          user_id: string | null
-          total_amount: number
-          status: string
-          shipping_address: Json | null
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          id?: string
-          user_id?: string | null
-          total_amount: number
-          status?: string
-          shipping_address?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          id?: string
-          user_id?: string | null
-          total_amount?: number
-          status?: string
-          shipping_address?: Json | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      order_items: {
-        Row: {
-          id: string
-          order_id: string | null
-          product_id: string | null
-          quantity: number
-          price: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          order_id?: string | null
-          product_id?: string | null
-          quantity: number
-          price: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          order_id?: string | null
-          product_id?: string | null
-          quantity?: number
-          price?: number
-          created_at?: string
+          role?: string | null
         }
       }
     }
@@ -200,7 +139,7 @@ export interface Database {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      user_role: 'user' | 'seller' | 'publisher' | 'admin'
     }
     CompositeTypes: {
       [_ in never]: never
