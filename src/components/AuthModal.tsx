@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Eye, EyeOff } from 'lucide-react';
+import { X, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
 interface AuthModalProps {
@@ -12,39 +12,38 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [username, setUsername] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccess(null);
+    setError('');
+    setSuccess('');
 
     try {
       if (mode === 'signup') {
-        const { error } = await signUp(email, password);
-        if (error) {
-          setError(error.message);
-        } else {
-          setSuccess('Account created successfully! Please check your email to verify your account.');
-          setEmail('');
-          setPassword('');
+        if (!username.trim()) {
+          throw new Error('Username is required');
         }
+        await signUp(email, password, username);
+        setSuccess('Account created successfully! Please check your email for verification.');
+        // Clear form
+        setEmail('');
+        setPassword('');
+        setUsername('');
       } else {
-        const { error } = await signIn(email, password);
-        if (error) {
-          setError(error.message);
-        } else {
-          onClose();
-        }
+        await signIn(email, password);
+        onClose();
       }
-    } catch (err: any) {
-      setError(err.message || 'An unexpected error occurred');
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -53,8 +52,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
   const resetForm = () => {
     setEmail('');
     setPassword('');
-    setError(null);
-    setSuccess(null);
+    setUsername('');
+    setError('');
+    setSuccess('');
   };
 
   const switchMode = () => {
@@ -74,23 +74,14 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
           <X className="w-6 h-6" />
         </button>
 
-        <h2 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold mb-6 text-center">
           {mode === 'signin' ? 'Sign In' : 'Create Account'}
         </h2>
 
         {error && (
-          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md flex items-start gap-2">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
             <p className="text-red-700 text-sm">{error}</p>
-            {error.includes('security verification issues') && (
-              <div className="mt-2 text-xs text-red-600">
-                <p>This is a temporary server-side issue. You can:</p>
-                <ul className="list-disc list-inside mt-1">
-                  <li>Try again in a few minutes</li>
-                  <li>Contact support if the issue persists</li>
-                  <li>Check if your Supabase project has reCAPTCHA properly configured</li>
-                </ul>
-              </div>
-            )}
           </div>
         )}
 
@@ -101,6 +92,23 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {mode === 'signup' && (
+            <div>
+              <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                id="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+                disabled={loading}
+              />
+            </div>
+          )}
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
@@ -126,10 +134,10 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 pr-10"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
-                disabled={loading}
                 minLength={6}
+                disabled={loading}
               />
               <button
                 type="button"
@@ -140,6 +148,9 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
+            {mode === 'signup' && (
+              <p className="text-xs text-gray-500 mt-1">Password must be at least 6 characters long</p>
+            )}
           </div>
 
           <button
@@ -151,21 +162,28 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
           </button>
         </form>
 
-        <div className="mt-4 text-center">
-          <button
-            onClick={switchMode}
-            className="text-blue-600 hover:text-blue-700 text-sm"
-            disabled={loading}
-          >
-            {mode === 'signin' 
-              ? "Don't have an account? Sign up" 
-              : 'Already have an account? Sign in'
-            }
-          </button>
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
+            <button
+              onClick={switchMode}
+              className="text-blue-600 hover:text-blue-700 font-medium"
+              disabled={loading}
+            >
+              {mode === 'signin' ? 'Sign up' : 'Sign in'}
+            </button>
+          </p>
         </div>
+
+        {mode === 'signup' && (
+          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+            <p className="text-blue-700 text-xs">
+              <strong>Note:</strong> If you encounter issues during account creation, please try again in a few minutes. 
+              Our security systems may temporarily limit new registrations.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
 }
-
-export default AuthModal
