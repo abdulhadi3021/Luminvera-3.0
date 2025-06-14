@@ -187,3 +187,5 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
     </div>
   );
 }
+
+export default AuthModal
