@@ -32,18 +32,7 @@ export function useAuth() {
       });
 
       if (error) {
-        // Handle specific Supabase auth errors with user-friendly messages
-        if (error.message.includes('captcha verification process failed')) {
-          throw new Error('Account creation is temporarily unavailable due to security verification. Please try again in a few minutes or contact support if the issue persists.');
-        } else if (error.message.includes('User already registered')) {
-          throw new Error('An account with this email already exists. Please try signing in instead.');
-        } else if (error.message.includes('Invalid email')) {
-          throw new Error('Please enter a valid email address.');
-        } else if (error.message.includes('Password should be at least')) {
-          throw new Error('Password must be at least 6 characters long.');
-        } else {
-          throw new Error(error.message || 'Failed to create account. Please try again.');
-        }
+        throw new Error(error.message || 'Failed to create account. Please try again.');
       }
 
       if (data.user) {

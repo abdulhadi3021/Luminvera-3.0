@@ -32,11 +32,15 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
           throw new Error('Username is required');
         }
         await signUp(email, password, username);
-        setSuccess('Account created successfully! Please check your email for verification.');
+        setSuccess('Account created successfully!');
         // Clear form
         setEmail('');
         setPassword('');
         setUsername('');
+        // Close modal after successful signup
+        setTimeout(() => {
+          onClose();
+        }, 1500);
       } else {
         await signIn(email, password);
         onClose();
@@ -102,7 +106,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
                 id="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 required
                 disabled={loading}
               />
@@ -118,7 +122,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
               required
               disabled={loading}
             />
@@ -134,7 +138,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 pr-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                 required
                 minLength={6}
                 disabled={loading}
@@ -156,7 +160,7 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-primary-500 text-white py-2 px-4 rounded-md hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Please wait...' : (mode === 'signin' ? 'Sign In' : 'Create Account')}
           </button>
@@ -167,25 +171,16 @@ export function AuthModal({ isOpen, onClose, initialMode = 'signin' }: AuthModal
             {mode === 'signin' ? "Don't have an account? " : 'Already have an account? '}
             <button
               onClick={switchMode}
-              className="text-blue-600 hover:text-blue-700 font-medium"
+              className="text-primary-600 hover:text-primary-700 font-medium"
               disabled={loading}
             >
               {mode === 'signin' ? 'Sign up' : 'Sign in'}
             </button>
           </p>
         </div>
-
-        {mode === 'signup' && (
-          <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
-            <p className="text-blue-700 text-xs">
-              <strong>Note:</strong> If you encounter issues during account creation, please try again in a few minutes. 
-              Our security systems may temporarily limit new registrations.
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );
 }
 
-export default AuthModal
+export default AuthModal;
