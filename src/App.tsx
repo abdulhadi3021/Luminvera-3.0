@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import CategoryGrid from './components/CategoryGrid';
@@ -17,7 +17,7 @@ function App() {
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
-  const { user, loading: authLoading } = useAuth();
+  const { loading: authLoading } = useAuth();
   const { products, searchProducts, fetchProducts } = useProducts();
 
   const handleSearch = async (query: string) => {
