@@ -29,10 +29,26 @@ export function useAuth() {
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            username: username,
+            full_name: username,
+          }
+        }
       });
 
       if (error) {
         throw new Error(error.message || 'Failed to create account. Please try again.');
+      }
+
+      if (data.user && !data.user.email_confirmed_at) {
+        // User needs to verify email
+        return {
+          user: data.user,
+          needsVerification: true,
+          message: 'Please check your email and click the verification link to complete your account setup.'
+        };
       }
 
       if (data.user) {
@@ -54,7 +70,7 @@ export function useAuth() {
         }
       }
 
-      return data;
+      return { user: data.user, needsVerification: false };
     } catch (error) {
       console.error('Sign up error:', error);
       throw error;
@@ -79,6 +95,11 @@ export function useAuth() {
         }
       }
 
+      // Check if email is verified
+      if (data.user && !data.user.email_confirmed_at) {
+        throw new Error('Please verify your email address before signing in. Check your inbox for the verification link.');
+      }
+
       return data;
     } catch (error) {
       console.error('Sign in error:', error);
@@ -98,11 +119,33 @@ export function useAuth() {
     }
   };
 
+  const resendVerification = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to resend verification email');
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Resend verification error:', error);
+      throw error;
+    }
+  };
+
   return {
     user,
     loading,
     signUp,
     signIn,
     signOut,
+    resendVerification,
   };
 }

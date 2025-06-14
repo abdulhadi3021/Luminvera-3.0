@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
 import HeroSection from './components/HeroSection';
 import CategoryGrid from './components/CategoryGrid';
@@ -6,18 +7,18 @@ import DealsSection from './components/DealsSection';
 import SearchResults from './components/SearchResults';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
+import AuthCallback from './components/AuthCallback';
 import CartModal from './components/CartModal';
 import { useProducts } from './hooks/useProducts';
 import { useAuth } from './hooks/useAuth';
 import './App.css';
 
-function App() {
+function HomePage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isCartModalOpen, setIsCartModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin');
 
-  const { loading: authLoading } = useAuth();
   const { products, searchProducts, fetchProducts } = useProducts();
 
   const handleSearch = async (query: string) => {
@@ -33,14 +34,6 @@ function App() {
     setAuthMode(mode);
     setIsAuthModalOpen(true);
   };
-
-  if (authLoading) {
-    return (
-      <div className="min-h-screen bg-white flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -74,6 +67,27 @@ function App() {
         onAuthRequired={() => handleAuthRequired('signin')}
       />
     </div>
+  );
+}
+
+function App() {
+  const { loading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      </div>
+    );
+  }
+
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+      </Routes>
+    </Router>
   );
 }
 
