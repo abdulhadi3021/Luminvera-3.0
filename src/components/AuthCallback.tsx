@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
+import { supabase } from '../lib/supabase'; // Adjust path if needed
 
 const AuthCallback: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -19,7 +19,7 @@ const AuthCallback: React.FC = () => {
         const { data, error: authError } = await supabase.auth.exchangeCodeForSession({ code });
         if (authError) throw authError;
 
-        const user = data.session?.user;
+        const user = data?.session?.user;
         if (!user) throw new Error('No active user session');
 
         // ✅ Check if profile exists
@@ -29,14 +29,13 @@ const AuthCallback: React.FC = () => {
           .eq('id', user.id)
           .single();
 
-        // ✅ If profile doesn't exist and error is "no rows", create it
         if (!existingProfile && profileError?.code === 'PGRST116') {
           const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
 
           const { error: insertError } = await supabase.from('profiles').insert([
             {
               id: user.id,
-              username: username,
+              username,
               full_name: user.user_metadata?.full_name || username,
               role: 'user',
             },
@@ -51,9 +50,9 @@ const AuthCallback: React.FC = () => {
         setTimeout(() => {
           window.location.href = '/';
         }, 2000);
-      } catch (err) {
-        console.error('Callback error:', err);
-        setError(err instanceof Error ? err.message : 'Authentication failed');
+      } catch (err: any) {
+        console.error('Auth callback error:', err);
+        setError(err?.message || 'An unexpected error occurred');
       } finally {
         setLoading(false);
       }
@@ -62,28 +61,13 @@ const AuthCallback: React.FC = () => {
     handleAuthCallback();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
-          <h2 className="text-lg font-semibold text-gray-800">Verifying your email...</h2>
-          <p className="text-sm text-gray-500">Please wait while we confirm your account.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center p-6 max-w-md mx-auto">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Verification Failed</h2>
+  return (
+    <div className="p-6 text-center">
+      {loading && <p className="text-gray-500">Processing...</p>}
+      {!loading && success && <p className="text-green-600">Login successful! Redirecting...</p>}
+      {!loading && error && (
+        <>
+          <h2 className="text-xl font-semibold text-red-600">Verification Failed</h2>
           <p className="text-sm text-gray-600 my-2">{error}</p>
           <button
             onClick={() => (window.location.href = '/')}
@@ -91,28 +75,10 @@ const AuthCallback: React.FC = () => {
           >
             Return to Home
           </button>
-        </div>
-      </div>
-    );
-  }
-
-  if (success) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-white">
-        <div className="text-center p-6 max-w-md mx-auto">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-gray-900">Email Verified!</h2>
-          <p className="text-sm text-gray-600 my-2">You're all set. Redirecting you to the homepage...</p>
-        </div>
-      </div>
-    );
-  }
-
-  return null;
+        </>
+      )}
+    </div>
+  );
 };
 
 export default AuthCallback;
