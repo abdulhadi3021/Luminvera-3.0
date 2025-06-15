@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase'; // adjust path if needed
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../utils/supabaseClient';
 
 const AuthCallback: React.FC = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {Add commentMore actions
+  useEffect(() => {
     const handleAuthCallback = async () => {
       try {
         // ✅ Get code from URL
@@ -32,13 +31,11 @@ const AuthCallback: React.FC = () => {
         // ✅ If profile doesn't exist and error is "no rows", create it
         if (!existingProfile && profileError?.code === 'PGRST116') {
           const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
-
           const { error: insertError } = await supabase.from('profiles').insert([
             {
-              id: user.id,More actions
+              id: user.id,
               username: username,
-              full_name: user.user_metadata?.full_name || username,
-              role: 'user',
+              email: user.email,
             },
           ]);
 
@@ -47,37 +44,20 @@ const AuthCallback: React.FC = () => {
           }
         }
 
-        setSuccess(true);
         setTimeout(() => {
-          window.location.href = '/';
-        }, 2000);
-      } catch (err: any) {
-        console.error('Auth callback error:', err);
-        setError(err?.message || 'An unexpected error occurred');
-      } finally {
-        setLoading(false);
+          navigate('/');
+        }, 1000);
+      } catch (err) {
+        console.error('Error in auth callback:', err);
       }
     };
 
     handleAuthCallback();
-  }, []);
+  }, [navigate]);
 
   return (
-    <div className="p-6 text-center">
-      {loading && <p className="text-gray-500">Processing...</p>}
-      {!loading && success && <p className="text-green-600">Login successful! Redirecting...</p>}
-      {!loading && error && (
-        <>
-          <h2 className="text-xl font-semibold text-red-600">Verification Failed</h2>
-          <p className="text-sm text-gray-600 my-2">{error}</p>
-          <button
-            onClick={() => (window.location.href = '/')}
-            className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mt-4 transition"
-          >
-            Return to Home
-          </button>
-        </>
-      )}
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h2 className="text-xl font-semibold text-gray-900">Processing authentication...</h2>
     </div>
   );
 };
