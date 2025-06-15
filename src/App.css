@@ -2,16 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom scrollbar for horizontal scrolling */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* Internet Explorer 10+ */
-  scrollbar-width: none;  /* Firefox */
-}
-.scrollbar-hide::-webkit-scrollbar { 
-  display: none;  /* Safari and Chrome */
+/* Global Styles */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #213547;
+  background-color: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+
+  /* Responsive root font size */
+  font-size: clamp(14px, 2vw, 18px);
 }
 
-/* Line clamp utility */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: start;
+  padding: 1rem;
+}
+
+#root {
+  width: 100%;
+  max-width: 1280px;
+  min-height: 100vh;
+}
+
+/* Responsive media query for small screens */
+@media (max-width: 600px) {
+  :root {
+    font-size: 14px;
+  }
+
+  body {
+    padding: 0.5rem;
+  }
+}
+
+/* Custom Scrollbar Hide */
+.scrollbar-hide {
+  -ms-overflow-style: none;     /* IE 10+ */
+  scrollbar-width: none;        /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;                /* Safari and Chrome */
+}
+
+/* Line Clamp (2 lines) */
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -19,7 +73,7 @@
   overflow: hidden;
 }
 
-/* Smooth animations */
+/* Smooth Fade-in Animation */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -30,23 +84,24 @@
     transform: translateY(0);
   }
 }
-
 .animate-fade-in {
   animation: fadeIn 0.6s ease-out;
 }
 
-/* Focus styles for accessibility */
+/* Accessibility: Focus Styles */
 .focus-visible:focus {
   outline: 2px solid #FF6B35;
   outline-offset: 2px;
 }
 
-/* Custom button hover effects */
+/* Tailwind Custom Utility Classes */
+
+/* Button Primary Hover */
 .btn-primary-hover {
   @apply transition-all duration-300 transform hover:scale-105 hover:shadow-lg;
 }
 
-/* Card hover effects */
+/* Card Hover Effect */
 .card-hover {
   @apply transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl;
 }
