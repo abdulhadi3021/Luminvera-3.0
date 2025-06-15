@@ -77,26 +77,27 @@ const Footer: React.FC = () => {
                 Stay updated with our latest products and exclusive deals
               </p>
             </div>
-            <form
-              onSubmit={handleNewsletterSubmit}
-              className="flex flex-col sm:flex-row gap-4 w-full"
-            >
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Your email address"
-                required
-                className="w-full sm:flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
-              />
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
-              >
-                <span>Subscribe</span>
-                <ArrowRight className="h-4 w-4" />
-              </button>
-            </form>
+<form
+  onSubmit={handleNewsletterSubmit}
+  className="flex flex-col sm:flex-row gap-4 w-full"
+>
+  <input
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    placeholder="Your email address"
+    required
+    className="flex-1 px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none"
+  />
+  <button
+    type="submit"
+    className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-300 transform hover:scale-105 flex items-center justify-center space-x-2"
+  >
+    <span>Subscribe</span>
+    <ArrowRight className="h-4 w-4" />
+  </button>
+</form>
+
           </div>
         </div>
 
