@@ -9,14 +9,19 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // ✅ Automatically exchanges auth code from URL
-        const { data, error: authError } = await supabase.auth.exchangeCodeForSession();
+        const url = new URL(window.location.href);
+        const code = url.searchParams.get('code');
+
+        if (!code) {
+          throw new Error('No code found in URL');
+        }
+
+        const { data, error: authError } = await supabase.auth.exchangeCodeForSession(code);
         if (authError) throw authError;
 
-        const user = data.session?.user;
+        const user = data?.user;
         if (!user) throw new Error('No active user session');
 
-        // ✅ Check if user profile exists
         const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -29,7 +34,7 @@ const AuthCallback: React.FC = () => {
           const { error: insertError } = await supabase.from('profiles').insert([
             {
               id: user.id,
-              username: username,
+              username,
               full_name: user.user_metadata?.full_name || username,
               role: 'user',
             },
