@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase'; // Adjust path if needed
+import { supabase } from '../lib/supabase'; // adjust path if needed
 
 const AuthCallback: React.FC = () => {
   const [loading, setLoading] = useState(true);
@@ -29,6 +29,7 @@ const AuthCallback: React.FC = () => {
           .eq('id', user.id)
           .single();
 
+        // ✅ If profile doesn't exist and error is 'PGRST116', create it
         if (!existingProfile && profileError?.code === 'PGRST116') {
           const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
 
