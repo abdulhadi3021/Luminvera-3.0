@@ -9,21 +9,22 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // ✅ Correct way to handle magic link or OAuth callbacks in Supabase v2+
+        // ✅ Exchange the auth code from URL for a session
         const { data, error: authError } = await supabase.auth.exchangeCodeForSession();
         if (authError) throw authError;
 
         const user = data.session?.user;
         if (!user) throw new Error('No active user session');
 
-        // ✅ Check if profile already exists
-        const { data: profile, error: profileError } = await supabase
+        // ✅ Check if user profile exists
+        const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
-        if (profileError && profileError.code === 'PGRST116') {
+        // ✅ If no profile, insert a new one
+        if (!existingProfile && profileError && profileError.code === 'PGRST116') {
           const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
 
           const { error: insertError } = await supabase.from('profiles').insert([
@@ -35,7 +36,7 @@ const AuthCallback: React.FC = () => {
             },
           ]);
 
-          if (insertError) throw insertError;
+          if (insertError) console.error('Error inserting profile:', insertError);
         }
 
         setSuccess(true);
