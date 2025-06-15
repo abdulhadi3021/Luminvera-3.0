@@ -6,7 +6,7 @@ const AuthCallback: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  useEffect(() => {
+  useEffect(() => {Add commentMore actions
     const handleAuthCallback = async () => {
       try {
         // ✅ Get code from URL
@@ -19,7 +19,7 @@ const AuthCallback: React.FC = () => {
         const { data, error: authError } = await supabase.auth.exchangeCodeForSession({ code });
         if (authError) throw authError;
 
-        const user = data?.session?.user;
+        const user = data.session?.user;
         if (!user) throw new Error('No active user session');
 
         // ✅ Check if profile exists
@@ -29,14 +29,14 @@ const AuthCallback: React.FC = () => {
           .eq('id', user.id)
           .single();
 
-        // ✅ If profile doesn't exist and error is 'PGRST116', create it
+        // ✅ If profile doesn't exist and error is "no rows", create it
         if (!existingProfile && profileError?.code === 'PGRST116') {
           const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
 
           const { error: insertError } = await supabase.from('profiles').insert([
             {
-              id: user.id,
-              username,
+              id: user.id,More actions
+              username: username,
               full_name: user.user_metadata?.full_name || username,
               role: 'user',
             },
