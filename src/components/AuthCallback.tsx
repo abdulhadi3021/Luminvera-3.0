@@ -9,11 +9,10 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // ✅ Set session from URL (required for magic link)
-        const { error: urlError } = await supabase.auth.setSessionFromUrl();
-        if (urlError) throw urlError;
+        // ✅ Correct Supabase V2 method
+        const { error: sessionError } = await supabase.auth.exchangeCodeForSession();
+        if (sessionError) throw sessionError;
 
-        // ✅ Get session
         const { data, error } = await supabase.auth.getSession();
         if (error) throw error;
 
