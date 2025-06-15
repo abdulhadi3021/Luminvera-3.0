@@ -9,20 +9,20 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // ✅ Extract code from URL
-        const params = new URLSearchParams(window.location.search);
-        const code = params.get('code');
+        // ✅ Get code from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
 
-        if (!code) throw new Error('Missing authorization code');
+        if (!code) throw new Error('Missing auth code from URL');
 
-        // ✅ Exchange the auth code for a session
+        // ✅ Exchange code for session
         const { data, error: authError } = await supabase.auth.exchangeCodeForSession({ code });
         if (authError) throw authError;
 
         const user = data.session?.user;
         if (!user) throw new Error('No active user session');
 
-        // ✅ Check if user profile exists
+        // ✅ Check if profile exists
         const { data: existingProfile, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -42,7 +42,9 @@ const AuthCallback: React.FC = () => {
             },
           ]);
 
-          if (insertError) console.error('Error inserting profile:', insertError);
+          if (insertError) {
+            console.error('Error inserting profile:', insertError);
+          }
         }
 
         setSuccess(true);
