@@ -9,18 +9,14 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // ✅ Use correct method for Supabase v2+
-        const { error: urlError } = await supabase.auth.exchangeCodeForSession();
-        if (urlError) throw urlError;
-
-        // ✅ Get session
-        const { data, error } = await supabase.auth.getSession();
-        if (error) throw error;
+        // ✅ Exchange the code in the URL for a session
+        const { data, error: authError } = await supabase.auth.exchangeCodeForSession();
+        if (authError) throw authError;
 
         const user = data.session?.user;
         if (!user) throw new Error('No active user session');
 
-        // ✅ Check if profile exists
+        // ✅ Check if user profile exists
         const { error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -81,7 +77,7 @@ const AuthCallback: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900">Verification Failed</h2>
           <p className="text-sm text-gray-600 my-2">{error}</p>
           <button
-            onClick={() => (window.location.href = '/')}
+            onClick={() => window.location.href = '/'}
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mt-4 transition"
           >
             Return to Home
