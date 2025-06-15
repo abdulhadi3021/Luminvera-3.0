@@ -9,8 +9,14 @@ const AuthCallback: React.FC = () => {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // ✅ Exchange the auth code from URL for a session
-        const { data, error: authError } = await supabase.auth.exchangeCodeForSession();
+        // ✅ Extract code from URL
+        const params = new URLSearchParams(window.location.search);
+        const code = params.get('code');
+
+        if (!code) throw new Error('Missing authorization code');
+
+        // ✅ Exchange the auth code for a session
+        const { data, error: authError } = await supabase.auth.exchangeCodeForSession({ code });
         if (authError) throw authError;
 
         const user = data.session?.user;
@@ -23,8 +29,8 @@ const AuthCallback: React.FC = () => {
           .eq('id', user.id)
           .single();
 
-        // ✅ If no profile, insert a new one
-        if (!existingProfile && profileError && profileError.code === 'PGRST116') {
+        // ✅ If profile doesn't exist and error is "no rows", create it
+        if (!existingProfile && profileError?.code === 'PGRST116') {
           const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
 
           const { error: insertError } = await supabase.from('profiles').insert([
@@ -78,7 +84,7 @@ const AuthCallback: React.FC = () => {
           <h2 className="text-xl font-semibold text-gray-900">Verification Failed</h2>
           <p className="text-sm text-gray-600 my-2">{error}</p>
           <button
-            onClick={() => window.location.href = '/'}
+            onClick={() => (window.location.href = '/')}
             className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg mt-4 transition"
           >
             Return to Home
